@@ -30,15 +30,22 @@
     var y = d3.scaleLinear.range([1000, 0]);
 
         data = [4, 6, 5];
-        d3.select(".chart")
-        .selectAll("rect")
-        .data(data)
-        .enter()
-        .append("rect")
-        .attr("width", 50)
-        .attr("height", function(d){return d;})
-        .attr("x", function(d, i) { return 50*i;})
-        .attr("y", function(d) { return 500 - d;});
+        // d3.select(".chart")
+        // .selectAll("rect")
+        // .data(data)
+        // .enter()
+        // .append("rect")
+        // .attr("width", 50)
+        // .attr("height", function(d){return d;})
+        // .attr("x", function(d, i) { return 50*i;})
+        // .attr("y", function(d) { return 500 - d;});
+
+        d3.select("svg").attr("width", 2000).attr("height", 1000).append("g").attr("transform", "translate(100,100)")
+        .selectAll("rect").data(data).enter().append("rect")
+        .attr("x", function(d,i){return x(i)})
+        .attr("y", function(d){return y(d)})
+        .attr("width", function(d,i){return i * 500;})
+        .attr("height", function(d){return 2000 - y(d)});
         // console.log(map);
     // }
    
