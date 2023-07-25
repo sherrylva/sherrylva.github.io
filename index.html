@@ -15,7 +15,7 @@
         const map = new Map();
         for(var i = 0; i < data.length; i++){
             const state = data[i].state;
-            const cases = data[i].cases;
+            const cases = parseInt(data[i].cases)
             if(map.get(state) === undefined){
                 map.set(state, 0);
             }
