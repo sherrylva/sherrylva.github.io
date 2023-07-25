@@ -2,7 +2,11 @@
 <script src='https://d3js.org/d3.v5.min.js'></script>
 <h1>hello world</h1>>
 <script>
-    const data = await d3.csv("https://github.com/sherrylva/sherrylva.github.io/blob/main/colleges.csv")
-    console.log(data)
+    loadData();
+    async function loadData(){
+        const data = await d3.csv("https://github.com/sherrylva/sherrylva.github.io/blob/main/colleges.csv")
+        console.log(data)
+    }
+   
 </script>
 </html>
