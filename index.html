@@ -1,11 +1,30 @@
 <html>
 <script src='https://d3js.org/d3.v5.min.js'></script>
 <h1>hello world</h1>>
+<svg class="chart">
+
+</svg>
+
 <script>
     loadData();
     async function loadData(){
         const data = await d3.csv("https://gist.githubusercontent.com/sherrylva/b2f8bc6e26f940e89461ac2a8be057d7/raw/9bf599b222ce69fe50804f0b55be866e8c8953ac/colleges.csv");
-        console.log(data)
+        console.log(data["state"])
+        calculateCounts(data);
+    }
+    function calculateCounts(data){
+        const map = new Map();
+        for(var i = 0; i < data.length; i++){
+            const state = data[i].state;
+            const cases = data[i].cases;
+            if(map.get(state) === undefined){
+                map.set(state, 0);
+            }
+            if(cases !== undefined){
+                map.set(state, map.get(state) + cases);
+            }
+        }
+        console.log(map);
     }
    
 </script>
