@@ -1,20 +1,93 @@
-<html>
+<html id="scene">
 <script src='https://d3js.org/d3.v5.min.js'></script>
-<style .chart rect {fill:blue}></style>
-<h1>Covid Cases in US Colleges By State</h1>>
+<style #chart rect {fill:blue;}></style>
+<h1>World Population By Region</h1>>
 <button onClick="goToSlide1()">1</button>
 <button onClick="goToSlide2()">2</button>
 <button onClick="goToSlide3()">3</button>
-<svg class="chart">
-</svg>
+<style>
+    #svg rect {
+        fill:rebeccapurple
+    }
+</style>
+<div id="chart">
+    <svg id="svg">
+    </svg>
+</div>
+
 
 <script>
-    loadData();
-    async function loadData(){
+    // firstScence();
+    loadCountriesData();
+    async function loadCountriesData(){
+        const data = await d3.csv("https://gist.githubusercontent.com/sherrylva/c2dfa8eb761c7053ed28d256d818b31e/raw/6ce7406f2d6234db6a4651b455e7cd46f7239ed4/countries.csv");
+        // console.log(data)
+        // createFirstScene(data)
+        createSecondScene(data);
+    }
+    async function loadCollegesData(){
         const data = await d3.csv("https://gist.githubusercontent.com/sherrylva/b2f8bc6e26f940e89461ac2a8be057d7/raw/9bf599b222ce69fe50804f0b55be866e8c8953ac/colleges.csv");
+        return data;
+        // createBarChart(data);
+    }
+    function createSecondScene(data){
+
+    }
+    function createFirstScene(data){
+        const mapPop = new Map();
+        const mapNumCountries = new Map();
+        for(var i = 0; i < data.length; i++){
+            const region = data[i].Region;
+            const population = parseInt(data[i].Population)
+            if(mapPop.get(region) === undefined){
+                mapPop.set(region, 0);
+            }
+            if(mapNumCountries.get(region) === undefined){
+                mapNumCountries.set(region, 0);
+            }
+            if(mapPop !== undefined){
+                mapPop.set(region, mapPop.get(region) + population);
+            }
+            if(mapNumCountries.get(region) !== undefined){
+                mapNumCountries.set(region, mapNumCountries.get(region) + 1);
+            }
+        }
+        const sortedMap = new Map([...mapPop.entries()].sort((a, b) => b[1] - a[1]));
+        console.log(sortedMap);
+        console.log(mapNumCountries);
+        regions = []
+        population = []
+        for (let key of sortedMap.keys()) {
+            regions.push(key);
+            population.push(sortedMap.get(key));
+        }
+        max = Math.max(...population)
+        var x = d3.scaleBand().domain(regions).range([0, 700]);
+        var y = d3.scaleLinear().domain([0, max]).range([350, 0]);
+        console.log(y(4))
+        d3.select("svg").attr("width", 900).attr("height", 550).append("g").attr("transform", "translate(100,100)")
+        .selectAll("rect").data(population).enter().append("rect")
+        .attr("x", function(d,i){return x(regions[i])})
+        .attr("y", function(d){return y(d)})
+        .attr("width", function(d,i){return 50})
+        .attr("height", function(d){return 350 - y(d)})
+        // .on("mouseover", mouseover)
+        // .on("mousemove", mousemove);
+
+        d3.select("svg").append("g").attr("transform", "translate(100,100)").call(d3.axisLeft(y));
+        d3.select("svg").append("g").attr("transform", "translate(100, 450)").call(d3.axisBottom(x)).selectAll("text")  
+        .style("text-anchor", "end")
+        .attr("transform", "rotate(-55)");
+    }
+    async function loadPrisonData(){
+        const data = await d3.csv("https://gist.githubusercontent.com/sherrylva/b2f8bc6e26f940e89461ac2a8be057d7/raw/9bf599b222ce69fe50804f0b55be866e8c8953ac/colleges.csv");
+        return data;
+
+    }
+    async function firstScence(){
+        const data = await loadCollegesData();
         createBarChart(data);
     }
-    
     function createBarChart(data){
         const map = new Map();
         for(var i = 0; i < data.length; i++){
@@ -41,9 +114,22 @@
         min = Math.min(...cases)
         max = Math.max(...cases)
 
+        // var tooltip = d3.select('.tooltip-area')
+        // .style('opacity', 0);
+        // var mouseover = function(d) {
+        //     console.log("hi");
+        //     tooltip.style("opacity", 1)
+        // }
+        // var mousemove = function(d) {
+        //     console.log("move")
+        //     tooltip.style('opacity', 0);
+        //     // tooltip
+        //     // .style("left", (d3.mouse(this)[0]+90) + "px") // It is important to put the +90: other wise the tooltip is exactly where the point is an it creates a weird effect
+        //     // .style("top", (d3.mouse(this)[1]) + "px")
+        // }
         // console.log(data.length)
         // console.log(max)
-        var domain = createDomain(cases.length)
+        //var domain = createDomain(cases.length)
         var x = d3.scaleBand().domain(states).range([0, 1200]);
         var y = d3.scaleLinear().domain([0, max]).range([350, 0]);
         console.log(y(4))
@@ -52,28 +138,25 @@
         .attr("x", function(d,i){return x(states[i])})
         .attr("y", function(d){return y(d)})
         .attr("width", function(d,i){return 15})
-        .attr("height", function(d){return 350 - y(d)});
+        .attr("height", function(d){return 350 - y(d)})
+        // .on("mouseover", mouseover)
+        // .on("mousemove", mousemove);
 
         d3.select("svg").append("g").attr("transform", "translate(50,50)").call(d3.axisLeft(y));
         d3.select("svg").append("g").attr("transform", "translate(50, 400)").call(d3.axisBottom(x)).selectAll("text")  
         .style("text-anchor", "end")
-        .attr("transform", "rotate(-65)");;
+        .attr("transform", "rotate(-65)");
+
     }
 
-    function createDomain(num){
-        domain = []
-        i = 0;
-        while(i < num){
-            domain.push(i);
-            i = i + 1;
-        }
-        return domain;
-    }
-    function goToSlide1(){
+    async function goToSlide1(){
+        const data = await loadCountriesData();
+        createFirstScene(data);
+        // firstScence(); 
         console.log("hi from slide 1");
     }
     function goToSlide2(){
-        d3.select("svg").remove();
+        d3.selectAll("svg > *").remove();
         console.log("hi from slide 2");
     }
     function goToSlide3(){
