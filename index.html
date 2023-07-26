@@ -1,35 +1,89 @@
 <html>
 <script src='https://d3js.org/d3.v5.min.js'></script>
 <style .chart rect {fill:blue}></style>
-<h1>hello world</h1>>
-<svg class="chart" width="2000" height="1000">
-<rect height="1000" width="500" x="100" y="100"></rect>
-<!-- <rect></rect>
-<rect></rect> -->
+<h1>Covid Cases in US Colleges By State</h1>>
+<button onClick="goToSlide1()">1</button>
+<button onClick="goToSlide2()">2</button>
+<button onClick="goToSlide3()">3</button>
+<svg class="chart">
 </svg>
 
 <script>
-    // loadData();
-    // async function loadData(){
-    //     const data = await d3.csv("https://gist.githubusercontent.com/sherrylva/b2f8bc6e26f940e89461ac2a8be057d7/raw/9bf599b222ce69fe50804f0b55be866e8c8953ac/colleges.csv");
-    //     calculateCounts(data);
-    // }
-    // function calculateCounts(data){
-    //     const map = new Map();
-    //     for(var i = 0; i < data.length; i++){
-    //         const state = data[i].state;
-    //         const cases = parseInt(data[i].cases)
-    //         if(map.get(state) === undefined){
-    //             map.set(state, 0);
-    //         }
-    //         if(cases !== undefined){
-    //             map.set(state, map.get(state) + cases);
-    //         }
-    //     }
-    var x = d3.scaleBand().range([0, 2000]);
-    var y = d3.scaleLinear().range([1000, 0]);
-
+    loadData();
+    async function loadData(){
+        const data = await d3.csv("https://gist.githubusercontent.com/sherrylva/b2f8bc6e26f940e89461ac2a8be057d7/raw/9bf599b222ce69fe50804f0b55be866e8c8953ac/colleges.csv");
+        createBarChart(data);
+    }
+    
+    function createBarChart(data){
+        const map = new Map();
+        for(var i = 0; i < data.length; i++){
+            const state = data[i].state;
+            const cases = parseInt(data[i].cases)
+            if(map.get(state) === undefined){
+                map.set(state, 0);
+            }
+            if(cases !== undefined){
+                map.set(state, map.get(state) + cases);
+            }
+        }
+        const sortedMap = new Map([...map.entries()].sort((a, b) => b[1] - a[1]));
+        // console.log(sortedMap);
+        states = []
+        cases = []
+        for (let key of sortedMap.keys()) {
+            states.push(key);
+            cases.push(map.get(key));
+        }
+        // console.log(states)
+        // console.log(cases)
         data = [4, 6, 5];
+        min = Math.min(...cases)
+        max = Math.max(...cases)
+
+        // console.log(data.length)
+        // console.log(max)
+        var domain = createDomain(cases.length)
+        var x = d3.scaleBand().domain(states).range([0, 1200]);
+        var y = d3.scaleLinear().domain([0, max]).range([350, 0]);
+        console.log(y(4))
+        d3.select("svg").attr("width", 1300).attr("height", 550).append("g").attr("transform", "translate(50,50)")
+        .selectAll("rect").data(cases).enter().append("rect")
+        .attr("x", function(d,i){return x(states[i])})
+        .attr("y", function(d){return y(d)})
+        .attr("width", function(d,i){return 15})
+        .attr("height", function(d){return 350 - y(d)});
+
+        d3.select("svg").append("g").attr("transform", "translate(50,50)").call(d3.axisLeft(y));
+        d3.select("svg").append("g").attr("transform", "translate(50, 400)").call(d3.axisBottom(x)).selectAll("text")  
+        .style("text-anchor", "end")
+        .attr("transform", "rotate(-65)");;
+    }
+
+    function createDomain(num){
+        domain = []
+        i = 0;
+        while(i < num){
+            domain.push(i);
+            i = i + 1;
+        }
+        return domain;
+    }
+    function goToSlide1(){
+        console.log("hi from slide 1");
+    }
+    function goToSlide2(){
+        d3.select("svg").remove();
+        console.log("hi from slide 2");
+    }
+    function goToSlide3(){
+        console.log("hi from slide 3");
+    }
+
+
+
+
+       
         // d3.select(".chart")
         // .selectAll("rect")
         // .data(data)
@@ -40,12 +94,8 @@
         // .attr("x", function(d, i) { return 50*i;})
         // .attr("y", function(d) { return 500 - d;});
 
-        d3.select("svg").attr("width", 2000).attr("height", 1000).append("g").attr("transform", "translate(100,100)")
-        .selectAll("rect").data(data).enter().append("rect")
-        .attr("x", function(d,i){return x(i)})
-        .attr("y", function(d){return y(d)})
-        .attr("width", function(d,i){return i * 500;})
-        .attr("height", function(d){return 2000 - y(d)});
+
+
         // console.log(map);
     // }
    
