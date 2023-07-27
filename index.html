@@ -5,34 +5,101 @@
 <button onClick="goToSlide1()">1</button>
 <button onClick="goToSlide2()">2</button>
 <button onClick="goToSlide3()">3</button>
+<script>
+    
+</script>
 <style>
     #svg rect {
         fill:rebeccapurple
     }
 </style>
-<div id="chart">
+<!-- <div id="chart"> -->
+    <select id="dropdown" onchange="dropdownChange(this.value);"></select>
     <svg id="svg">
     </svg>
-</div>
+<!-- </div> -->
 
 
 <script>
-    // firstScence();
+    document.getElementById("dropdown").style.visibility = "hidden";
+    popMap = new Map()
+    urbanMap = new Map()
+    countries = []
+    loadPopulationData();
     loadCountriesData();
+    function dropdownChange(country){
+        d3.select('#svg').selectAll("*").remove();
+        console.log(popMap)
+        countryPopulation = popMap.get(country);
+        urbanPopulation = urbanMap.get(country);
+        console.log(countryPopulation)
+    
+        // max = Math.max(...population)
+        population = [countryPopulation, urbanPopulation]
+        domains = ["Total Population", "Urban Population"]
+        var x = d3.scaleBand().domain(domains).range([0, 700]);
+        var y = d3.scaleLinear().domain([0, countryPopulation]).range([350, 0]);
+        
+        d3.select("svg").attr("width", 900).attr("height", 550).append("g").attr("transform", "translate(100,100)")
+        .selectAll("rect").data(population).enter().append("rect")
+        .attr("x", function(d,i){return 125 + x(domains[i])})
+        .attr("y", function(d){return y(d)})
+        .attr("width", function(d,i){return 100})
+        .attr("height", function(d){return 350 - y(d)})
+        // .on("mouseover", mouseover)
+        // .on("mousemove", mousemove);
+
+        d3.select("svg").append("g").attr("transform", "translate(100,100)").call(d3.axisLeft(y));
+        d3.select("svg").append("g").attr("transform", "translate(100, 450)").call(d3.axisBottom(x)).selectAll("text")  
+        .style("text-anchor", "end")
+        .attr("transform", "rotate(-55)");
+
+        // console.log(country);
+        // console.log(popMap.get(country));
+        // console.log(urbanMap.get(country));
+    }
     async function loadCountriesData(){
         const data = await d3.csv("https://gist.githubusercontent.com/sherrylva/c2dfa8eb761c7053ed28d256d818b31e/raw/6ce7406f2d6234db6a4651b455e7cd46f7239ed4/countries.csv");
-        // console.log(data)
-        // createFirstScene(data)
-        createSecondScene(data);
+        createFirstScene(data)
+        // createSecondScene(data);
     }
+    async function loadPopulationData(){
+        const data = await d3.csv("https://gist.githubusercontent.com/sherrylva/dc0988dacc1dde3b7b6392b4a1565db0/raw/7dbf816a53e517d2dd239d7d32173b73cafc26f5/worldPopulation.csv");
+        createThirdScene(data);
+    }
+
     async function loadCollegesData(){
         const data = await d3.csv("https://gist.githubusercontent.com/sherrylva/b2f8bc6e26f940e89461ac2a8be057d7/raw/9bf599b222ce69fe50804f0b55be866e8c8953ac/colleges.csv");
         return data;
         // createBarChart(data);
     }
-    function createSecondScene(data){
+    function createThirdScene(data){
+       
+        for(var i = 0; i < data.length; i++){
+            const country = data[i].Country;
+            const pop = parseInt(data[i].Population);
+            const urban = parseInt(data[i].Urban)
+            console.log("urban pop")
+            console.log(urban)
+            var urbanPop = Math.ceil((urban/100) * pop);
+            if(isNaN(urban)){
+                urbanPop = 0;
+            }
+            countries.push(data[i].Country);
+            popMap.set(country, pop)
+            urbanMap.set(country, urbanPop);
 
+            var dropdown = document.getElementById("dropdown");
+            var option = document.createElement("option")
+            option.text = country;
+            option.value = country;
+            dropdown.add(option);
+        }
+        console.log(countries)
+        console.log(popMap)
+        console.log(urbanMap)
     }
+
     function createFirstScene(data){
         const mapPop = new Map();
         const mapNumCountries = new Map();
@@ -84,10 +151,7 @@
         return data;
 
     }
-    async function firstScence(){
-        const data = await loadCollegesData();
-        createBarChart(data);
-    }
+
     function createBarChart(data){
         const map = new Map();
         for(var i = 0; i < data.length; i++){
@@ -150,37 +214,17 @@
     }
 
     async function goToSlide1(){
-        const data = await loadCountriesData();
-        createFirstScene(data);
-        // firstScence(); 
-        console.log("hi from slide 1");
+        document.getElementById("dropdown").style.visibility = "hidden";
+        loadCountriesData() // Loads the data and creates the first scene chart as well
     }
     function goToSlide2(){
+        document.getElementById("dropdown").style.visibility = "hidden";
         d3.selectAll("svg > *").remove();
         console.log("hi from slide 2");
     }
     function goToSlide3(){
+        document.getElementById("dropdown").style.visibility = "visible";
         console.log("hi from slide 3");
     }
-
-
-
-
-       
-        // d3.select(".chart")
-        // .selectAll("rect")
-        // .data(data)
-        // .enter()
-        // .append("rect")
-        // .attr("width", 50)
-        // .attr("height", function(d){return d;})
-        // .attr("x", function(d, i) { return 50*i;})
-        // .attr("y", function(d) { return 500 - d;});
-
-
-
-        // console.log(map);
-    // }
-   
 </script>
 </html>
