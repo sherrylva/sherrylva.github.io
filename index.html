@@ -1,12 +1,18 @@
 <html id="scene">
 <script src='https://d3js.org/d3.v5.min.js'></script>
 <style></style>
-<h1>Exploring the World's Population</h1>>
+<h1>Exploring the World's Population (2020 Data)</h1>
+<h4>The world has SO many people. Have you explored where and how the population is spread across different countries?
+    Now is your chance to explore the population of the world by region and country!
+</h4>
 <button onClick="goToSlide1()">1</button>
 <button onClick="goToSlide2()">2</button>
 <button onClick="goToSlide3()">3</button>
 
 <style>
+    body {
+        background-color: lightblue
+    }
     #svg rect {
         fill:rebeccapurple
     }
@@ -20,22 +26,84 @@
 </style>
 <div>
 <div id="chart-title">World Population By Region</div>
-<select id="dropdown" onchange="dropdownChange(this.value);"></select>
+<div id="explanation">The following bar chart shows where the world's population is 
+    located by region. The most populated region is Asia and the least populated region 
+    is the Baltics. Hover over the barchart to see the number of countries located within each region.</div>>
+<select id="dropdown" onchange="dropdownChange(this.value);">
+</select>
 </div>
 <div id="tooltip">
 </div>
     <svg id="svg">
     </svg>
+    <select id="yearDropdown"onchange="yearDropdownChange(this.value, dropdown.value)">
+        <option value="2021">2021</option>
+        <option value="2022">2022</option>
+        <option value="2023">2023</option>
+        <option value="2024">2024</option>
+        <option value="2025">2025</option>
+        <option value="2026">2026</option>
+        <option value="2027">2027</option>
+        <option value="2028">2028</option>
+        <option value="2029">2029</option>
+        <option value="2030" selected>2030</option>
+    </select>
+    <h2 id="title2"></h2>
+    <svg id="svg2">
 
+    </svg>
 <script>
    
     popMap = new Map()
     urbanMap = new Map()
     areaMap = new Map()
+    yearlyChangeMap = new Map();
     countries = []
 
     loadCountriesData(); //basically loads first scene
 
+    function yearDropdownChange(year, country){
+        console.log(year)
+        console.log(country)
+        const currPop = popMap.get(country);
+        const change = yearlyChangeMap.get(country);
+        var currYear = 2020;
+
+        predictedPopulations = []
+        predictedYears = []
+        while(currYear <= year ){
+            const num = currYear - 2020;
+            const predictedPop = currPop + (change * num);
+            // console.log(change);
+            // console.log(currPop);
+            // console.log(predictedPop);
+            predictedPopulations.push(predictedPop)
+            predictedYears.push(currYear)
+            currYear += 1
+        }
+        console.log(predictedPopulations)
+        console.log(predictedYears)
+        document.getElementById("chart-title").innerHTML = country + " : Total Population vs. Urban Population"
+        d3.select('#svg2').selectAll("*").remove();
+        document.getElementById("title2").innerHTML = country + " : Predicted Population Through the Years 2020 - " + year;
+        var max_y = Math.max(...predictedPopulations)
+        var x = d3.scaleBand().domain(predictedYears).range([0, 700]);
+        var y = d3.scaleLinear().domain([0, max_y]).range([350, 0]);
+
+        d3.select("#svg2").attr("width", 900).attr("height", 550).append("g").attr("transform", "translate(100,100)")
+        .selectAll("rect").data(predictedPopulations).enter().append("rect")
+        .style("fill", "rebeccapurple")
+        .attr("x", function(d,i){return x(predictedYears[i])})
+        .attr("y", function(d){return y(d)})
+        .attr("width", function(d,i){return 50;})
+        .attr("height", function(d){return 350 - y(d)});
+        d3.select("#svg2").append("g").attr("transform", "translate(100,100)").call(d3.axisLeft(y));
+        d3.select("#svg2").append("g").attr("transform", "translate(100, 450)").call(d3.axisBottom(x)).selectAll("text")  
+        .style("text-anchor", "end")
+        .attr("transform", "rotate(-55)");
+        console.log("end")
+
+    }
     function dropdownChange(country){
         document.getElementById("chart-title").innerHTML = country + " : Total Population vs. Urban Population"
         d3.select('#svg').selectAll("*").remove();
@@ -48,7 +116,42 @@
         domains = ["Total Population", "Urban Population"]
         var x = d3.scaleBand().domain(domains).range([0, 700]);
         var y = d3.scaleLinear().domain([0, countryPopulation]).range([350, 0]);
-        
+        //Tooltip Design
+        var tooltip = d3.select("#tooltip")
+        .style("opacity", 0)
+        .style("background-color", "white")
+        .style("border", "solid")
+        .style("border-width", "1px")
+        .style("border-radius", "5px")
+        .style("padding", "10px")
+
+        // // Mouseover Callback that shows tooltip
+        // function mouseover(d, i){
+        //     const 
+        //     // const currRegion = regions[i];
+        //     consg
+        //     const numCountriesInRegion = mapNumCountries.get(currRegion);
+        //     const tooltipText = "Number of Countries: " + numCountriesInRegion;
+        //     tooltip.html( tooltipText)
+        //     .style("opacity", 1)
+        //     .style("left", d3.event.pageX + "px") 
+        //     .style("top", d3.event.pageY + "px")
+        //     .style("position", "absolute");
+        // }
+
+        // // Mousemove callback
+        // var mousemove = function(d) {
+        // tooltip
+        // .style("left",  d3.event.pageX + 5 + "px") 
+        // .style("top",  d3.event.pageY + 5 + "px")
+        // }
+
+        // // Mouseleave callback that removes tooltip
+        // var mouseleave = function(d) {
+        //     tooltip
+        //     .style("opacity", 0)
+        // } 
+
         d3.select("svg").attr("width", 900).attr("height", 550).append("g").attr("transform", "translate(100,100)")
         .selectAll("rect").data(population).enter().append("rect")
         .attr("x", function(d,i){return 125 + x(domains[i])})
@@ -62,6 +165,7 @@
     }
     async function loadCountriesData(){
         document.getElementById("dropdown").style.visibility = "hidden";
+        document.getElementById("yearDropdown").style.visibility = "hidden";
         document.getElementById("chart-title").innerHTML = "World Population By Region"
         const data = await d3.csv("https://gist.githubusercontent.com/sherrylva/c2dfa8eb761c7053ed28d256d818b31e/raw/6ce7406f2d6234db6a4651b455e7cd46f7239ed4/countries.csv");
        
@@ -69,7 +173,7 @@
     }
     async function loadPopulationData(){
        
-        const data = await d3.csv("https://gist.githubusercontent.com/sherrylva/dc0988dacc1dde3b7b6392b4a1565db0/raw/519d622af85090325ec3bec38d23565c8facd1bd/worldPopulation.csv");
+        const data = await d3.csv("https://gist.githubusercontent.com/sherrylva/dc0988dacc1dde3b7b6392b4a1565db0/raw/460543df26cdc60e28ba4d9832b2cebad4b261d6/worldPopulation.csv");
 
         createThirdScene(data);
     }
@@ -78,6 +182,7 @@
         for(var i = 0; i < data.length; i++){
             const country = data[i].Country;
             const pop = parseInt(data[i].Population);
+            const yearlyChange = parseInt(data[i].NetChange);
             const urban = parseInt(data[i].Urban)
 
             var urbanPop = Math.ceil((urban/100) * pop);
@@ -87,7 +192,7 @@
             countries.push(data[i].Country);
             popMap.set(country, pop)
             urbanMap.set(country, urbanPop);
-
+            yearlyChangeMap.set(country, yearlyChange);
             var dropdown = document.getElementById("dropdown");
             var option = document.createElement("option")
             option.text = country;
@@ -95,6 +200,10 @@
             dropdown.add(option);
         }
         dropdownChange(dropdown.value);
+
+        const yearDropdown = document.getElementById("yearDropdown")
+        yearDropdownChange(yearDropdown.value, dropdown.value);
+
     }
 
     function createFirstScene(data){
@@ -338,12 +447,14 @@
     function goToSlide2(){
         document.getElementById("chart-title").innerHTML = "Top 25 Most Populated Countries in the World"
         document.getElementById("dropdown").style.visibility = "hidden";
+        document.getElementById("yearDropdown").style.visibility = "hidden";
         d3.selectAll("svg > *").remove();
         createSecondScene()
     }
     function goToSlide3(){
         d3.selectAll("svg > *").remove();
         document.getElementById("dropdown").style.visibility = "visible";
+        document.getElementById("yearDropdown").style.visibility = "visible";
         loadPopulationData() // creates chart as well
     }
 </script>
