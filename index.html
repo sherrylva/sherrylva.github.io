@@ -5,28 +5,27 @@
 <button onClick="goToSlide1()">1</button>
 <button onClick="goToSlide2()">2</button>
 <button onClick="goToSlide3()">3</button>
-<script>
-    
-</script>
+
 <style>
     #svg rect {
         fill:rebeccapurple
     }
     #chart-title{
-        font-size: large;
+        font-size: 25;
         font-weight: bolder;
     }
     * {
         text-align: center;
     }
 </style>
+<div>
 <div id="chart-title">World Population By Region</div>
-<!-- <div id="chart"> -->
 <select id="dropdown" onchange="dropdownChange(this.value);"></select>
-<svg id="svg">
-</svg>
-<!-- </div> -->
-
+</div>
+<div id="tooltip">
+</div>
+    <svg id="svg">
+    </svg>
 
 <script>
    
@@ -37,15 +36,14 @@
 
     loadCountriesData(); //basically loads first scene
 
-  
     function dropdownChange(country){
+        document.getElementById("chart-title").innerHTML = country + " : Total Population vs. Urban Population"
         d3.select('#svg').selectAll("*").remove();
         console.log(popMap)
         countryPopulation = popMap.get(country);
         urbanPopulation = urbanMap.get(country);
         console.log(countryPopulation)
     
-        // max = Math.max(...population)
         population = [countryPopulation, urbanPopulation]
         domains = ["Total Population", "Urban Population"]
         var x = d3.scaleBand().domain(domains).range([0, 700]);
@@ -56,27 +54,23 @@
         .attr("x", function(d,i){return 125 + x(domains[i])})
         .attr("y", function(d){return y(d)})
         .attr("width", function(d,i){return 100})
-        .attr("height", function(d){return 350 - y(d)})
-        // .on("mouseover", mouseover)
-        // .on("mousemove", mousemove);
-
+        .attr("height", function(d){return 350 - y(d)});
         d3.select("svg").append("g").attr("transform", "translate(100,100)").call(d3.axisLeft(y));
         d3.select("svg").append("g").attr("transform", "translate(100, 450)").call(d3.axisBottom(x)).selectAll("text")  
         .style("text-anchor", "end")
         .attr("transform", "rotate(-55)");
-
-        // console.log(country);
-        // console.log(popMap.get(country));
-        // console.log(urbanMap.get(country));
     }
     async function loadCountriesData(){
         document.getElementById("dropdown").style.visibility = "hidden";
+        document.getElementById("chart-title").innerHTML = "World Population By Region"
         const data = await d3.csv("https://gist.githubusercontent.com/sherrylva/c2dfa8eb761c7053ed28d256d818b31e/raw/6ce7406f2d6234db6a4651b455e7cd46f7239ed4/countries.csv");
        
         createFirstScene(data)
     }
     async function loadPopulationData(){
+       
         const data = await d3.csv("https://gist.githubusercontent.com/sherrylva/dc0988dacc1dde3b7b6392b4a1565db0/raw/519d622af85090325ec3bec38d23565c8facd1bd/worldPopulation.csv");
+
         createThirdScene(data);
     }
     function createThirdScene(data){
@@ -85,7 +79,6 @@
             const country = data[i].Country;
             const pop = parseInt(data[i].Population);
             const urban = parseInt(data[i].Urban)
-            // const area = parseInt(data[i].Area) //km square
 
             var urbanPop = Math.ceil((urban/100) * pop);
             if(isNaN(urban)){
@@ -94,7 +87,6 @@
             countries.push(data[i].Country);
             popMap.set(country, pop)
             urbanMap.set(country, urbanPop);
-            // areaMap.set(country, area);
 
             var dropdown = document.getElementById("dropdown");
             var option = document.createElement("option")
@@ -106,6 +98,8 @@
     }
 
     function createFirstScene(data){
+
+        // Getting all data needed for the bar chart and tooltip information
         const mapPop = new Map();
         const mapNumCountries = new Map();
         for(var i = 0; i < data.length; i++){
@@ -133,18 +127,56 @@
             regions.push(key);
             population.push(sortedMap.get(key));
         }
+        
+
+        // Axes
         max = Math.max(...population)
         var x = d3.scaleBand().domain(regions).range([0, 700]);
         var y = d3.scaleLinear().domain([0, max]).range([350, 0]);
-        console.log(y(4))
+
+        //Tooltip Design
+        var tooltip = d3.select("#tooltip")
+                .style("opacity", 0)
+                .style("background-color", "white")
+                .style("border", "solid")
+                .style("border-width", "1px")
+                .style("border-radius", "5px")
+                .style("padding", "10px")
+        
+        // Mouseover Callback that shows tooltip
+        function mouseover(d, i){
+            const currRegion = regions[i];
+            const numCountriesInRegion = mapNumCountries.get(currRegion);
+            const tooltipText = "Number of Countries: " + numCountriesInRegion;
+            tooltip.html( tooltipText)
+            .style("opacity", 1)
+            .style("left", d3.event.pageX + "px") 
+            .style("top", d3.event.pageY + "px")
+            .style("position", "absolute");
+        }
+
+        // Mousemove callback
+        var mousemove = function(d) {
+        tooltip
+        .style("left",  d3.event.pageX + 5 + "px") 
+        .style("top",  d3.event.pageY + 5 + "px")
+        }
+
+        // Mouseleave callback that removes tooltip
+        var mouseleave = function(d) {
+            tooltip
+            .style("opacity", 0)
+        } 
+
         d3.select("svg").attr("width", 900).attr("height", 550).append("g").attr("transform", "translate(100,100)")
         .selectAll("rect").data(population).enter().append("rect")
         .attr("x", function(d,i){return x(regions[i])})
         .attr("y", function(d){return y(d)})
         .attr("width", function(d,i){return 50})
         .attr("height", function(d){return 350 - y(d)})
-        // .on("mouseover", mouseover)
-        // .on("mousemove", mousemove);
+        .on("mouseover", mouseover)
+        .on("mousemove", mousemove)
+        .on("mouseleave", mouseleave)
 
         d3.select("svg").append("g").attr("transform", "translate(100,100)").call(d3.axisLeft(y));
         d3.select("svg").append("g").attr("transform", "translate(100, 450)").call(d3.axisBottom(x)).selectAll("text")  
@@ -154,14 +186,17 @@
 
 
     async function createSecondScene(){
-        const data = await d3.csv("https://gist.githubusercontent.com/sherrylva/dc0988dacc1dde3b7b6392b4a1565db0/raw/519d622af85090325ec3bec38d23565c8facd1bd/worldPopulation.csv");
+        const data = await d3.csv("https://gist.githubusercontent.com/sherrylva/dc0988dacc1dde3b7b6392b4a1565db0/raw/9aa866136f7fd83cbec4941c0bcfe8ab16708cfb/worldPopulation.csv");
 
         // maxArea = d3.max(data, function(d){return d.Area})
         map = new Map();
+        worldShareMap = new Map();
         for(var i = 0; i < data.length; i++){
             const country = data[i].Country;
             const population = parseInt(data[i].Population)
+            const worldShare = data[i].WorldShare
             map.set(country, population)
+            worldShareMap.set(country, worldShare)
             }
             const sortedMap = new Map([...map.entries()].sort((a, b) => b[1] - a[1]));
         // maxPop = d3.max(data, function(d){return d.Population})
@@ -183,14 +218,49 @@
         var x = d3.scaleBand().domain(countries_second_scene).range([0, 700]);
         var y = d3.scaleLinear().domain([0, max]).range([350, 0]);
 
+        //Tooltip Design
+        var tooltip = d3.select("#tooltip")
+                        .style("opacity", 0)
+                        .style("background-color", "white")
+                        .style("border", "solid")
+                        .style("border-width", "1px")
+                        .style("border-radius", "5px");
+        
+        // Mouseover Callback that shows tooltip
+        function mouseover(d, i){
+            const currCountry = countries_second_scene[i];
+            const currPopulation = populations_second_scene[i];
+            const currWorldShare = worldShareMap.get(currCountry);
+            const tooltipText = "Population: " + currPopulation + "<br>" + "World Share: " + currWorldShare;
+            tooltip.html( tooltipText)
+            .style("opacity", 1)
+            .style("left", d3.event.pageX + "px") 
+            .style("top", d3.event.pageY + "px")
+            .style("position", "absolute");
+        }
+
+        // Mousemove callback
+        var mousemove = function(d) {
+        tooltip
+        .style("left",  d3.event.pageX + 5 + "px") 
+        .style("top",  d3.event.pageY + 5 + "px")
+        }
+
+        // Mouseleave callback that removes tooltip
+        var mouseleave = function(d) {
+            tooltip
+            .style("opacity", 0)
+        } 
+
         d3.select("svg").attr("width", 900).attr("height", 550).append("g").attr("transform", "translate(100,100)")
         .selectAll("rect").data(populations_second_scene).enter().append("rect")
         .attr("x", function(d,i){return x(countries_second_scene[i])})
         .attr("y", function(d){return y(d)})
         .attr("width", function(d,i){return 25})
         .attr("height", function(d){return 350 - y(d)})
-        // .on("mouseover", mouseover)
-        // .on("mousemove", mousemove);
+        .on("mouseover", mouseover)
+        .on("mousemove", mousemove)
+        .on("mouseleave", mouseleave);
 
         d3.select("svg").append("g").attr("transform", "translate(100,100)").call(d3.axisLeft(y));
         d3.select("svg").append("g").attr("transform", "translate(100, 450)").call(d3.axisBottom(x)).selectAll("text")  
@@ -266,6 +336,7 @@
         loadCountriesData() // Loads the data and creates the first scene chart as well
     }
     function goToSlide2(){
+        document.getElementById("chart-title").innerHTML = "Top 25 Most Populated Countries in the World"
         document.getElementById("dropdown").style.visibility = "hidden";
         d3.selectAll("svg > *").remove();
         createSecondScene()
