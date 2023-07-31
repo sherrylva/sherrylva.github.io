@@ -59,9 +59,9 @@
     <option value="2030" selected>2030</option>
 </select>
     <h2 id="title2"></h2>
-    <svg id="svg2">
+<svg id="svg2">
 
-    </svg>
+</svg>
 <script>
    
     popMap = new Map()
@@ -138,33 +138,6 @@
         .style("border-width", "1px")
         .style("border-radius", "5px")
         .style("padding", "10px")
-
-        // // Mouseover Callback that shows tooltip
-        // function mouseover(d, i){
-        //     const 
-        //     // const currRegion = regions[i];
-        //     consg
-        //     const numCountriesInRegion = mapNumCountries.get(currRegion);
-        //     const tooltipText = "Number of Countries: " + numCountriesInRegion;
-        //     tooltip.html( tooltipText)
-        //     .style("opacity", 1)
-        //     .style("left", d3.event.pageX + "px") 
-        //     .style("top", d3.event.pageY + "px")
-        //     .style("position", "absolute");
-        // }
-
-        // // Mousemove callback
-        // var mousemove = function(d) {
-        // tooltip
-        // .style("left",  d3.event.pageX + 5 + "px") 
-        // .style("top",  d3.event.pageY + 5 + "px")
-        // }
-
-        // // Mouseleave callback that removes tooltip
-        // var mouseleave = function(d) {
-        //     tooltip
-        //     .style("opacity", 0)
-        // } 
 
         d3.select("svg").attr("width", 900).attr("height", 550).append("g").attr("transform", "translate(100,100)")
         .selectAll("rect").data(population).enter().append("rect")
@@ -461,18 +434,20 @@
         document.getElementById("slide3button").style.backgroundColor = "white";
         document.getElementById("slide1button").style.backgroundColor = "rebeccapurple";
         document.getElementById("title2").innerHTML = "";
+        d3.select('#svg2').selectAll("*").remove();
         loadCountriesData() // Loads the data and creates the first scene chart as well
     }
     function goToSlide2(){
         document.getElementById("slide2button").style.backgroundColor = "rebeccapurple";
         document.getElementById("chart-title").innerHTML = "Top 25 Most Populated Countries in the World (2020 Data)"
-        document.getElementById("explanation").innerHTML = "In the previous slide, you saw how the world's population is spread across different regions. But how is the world's population spread across the different countries of the world?"
+        document.getElementById("explanation").innerHTML = "In the previous slide, you saw how the world's population is spread across different regions. But how is the world's population spread across the different countries of the world? The world's most populated country is China. Hover over the bars in the bar chart for more details on demand."
         document.getElementById("dropdown").style.visibility = "hidden";
         document.getElementById("yearDropdown").style.visibility = "hidden";
         document.getElementById("slide1button").style.backgroundColor = "white";
         document.getElementById("slide3button").style.backgroundColor = "white";
         document.getElementById("title2").innerHTML = "";
         d3.selectAll("svg > *").remove();
+        d3.select('#svg2').selectAll("*").remove();
         createSecondScene()
     }
     function goToSlide3(){
