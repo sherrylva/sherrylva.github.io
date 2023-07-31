@@ -2,14 +2,17 @@
 <script src='https://d3js.org/d3.v5.min.js'></script>
 <style></style>
 <h1>Exploring the World's Population (2020 Data)</h1>
-<h4>The world has SO many people. Have you explored where and how the population is spread across different countries?
+<h2>The world has SO many people. Have you explored where and how the population is spread across different countries?
     Now is your chance to explore the population of the world by region and country!
 </h4>
-<button onClick="goToSlide1()">1</button>
-<button onClick="goToSlide2()">2</button>
-<button onClick="goToSlide3()">3</button>
+<button id="slide1button" onClick="goToSlide1()">1</button>
+<button id="slide2button" onClick="goToSlide2()">2</button>
+<button id="slide3button" onClick="goToSlide3()">3</button>
 
 <style>
+    button { 
+        background-color: white;
+    }
     body {
         background-color: lightblue
     }
@@ -22,6 +25,11 @@
     }
     * {
         text-align: center;
+    }
+    #explanation {
+        font-size: 20;
+        border-style: solid;
+        
     }
 </style>
 <div id="explanation">The following bar chart shows where the world's population is 
@@ -61,7 +69,7 @@
     areaMap = new Map()
     yearlyChangeMap = new Map();
     countries = []
-
+    document.getElementById("slide1button").style.backgroundColor = "rebeccapurple";
     loadCountriesData(); //basically loads first scene
 
     function yearDropdownChange(year, country){
@@ -111,7 +119,7 @@
     function dropdownChange(country){
         document.getElementById("yearDropdown").options[9].selected = true;
         yearDropdownChange(2030, country)
-        document.getElementById("chart-title").innerHTML = country + " : Total Population vs. Urban Population"
+        document.getElementById("chart-title").innerHTML = country + " : Total Population vs. Urban Population (2020 Data)"
         d3.select('#svg').selectAll("*").remove();
         console.log(popMap)
         countryPopulation = popMap.get(country);
@@ -172,7 +180,7 @@
     async function loadCountriesData(){
         document.getElementById("dropdown").style.visibility = "hidden";
         document.getElementById("yearDropdown").style.visibility = "hidden";
-        document.getElementById("chart-title").innerHTML = "World Population By Region"
+        document.getElementById("chart-title").innerHTML = "World Population By Region (2020 Data)"
         document.getElementById("explanation").innerHTML = "The following bar chart shows where the world's population is located by region. The most populated region is Asia and the least populated region is the Baltics. Hover over the barchart to see the number of countries located within each region.";
         const data = await d3.csv("https://gist.githubusercontent.com/sherrylva/c2dfa8eb761c7053ed28d256d818b31e/raw/6ce7406f2d6234db6a4651b455e7cd46f7239ed4/countries.csv");
        
@@ -449,18 +457,29 @@
     async function goToSlide1(){
         d3.select('#svg').selectAll("*").remove();
         document.getElementById("dropdown").style.visibility = "hidden";
+        document.getElementById("slide2button").style.backgroundColor = "white";
+        document.getElementById("slide3button").style.backgroundColor = "white";
+        document.getElementById("slide1button").style.backgroundColor = "rebeccapurple";
+        document.getElementById("title2").innerHTML = "";
         loadCountriesData() // Loads the data and creates the first scene chart as well
     }
     function goToSlide2(){
-        document.getElementById("chart-title").innerHTML = "Top 25 Most Populated Countries in the World"
+        document.getElementById("slide2button").style.backgroundColor = "rebeccapurple";
+        document.getElementById("chart-title").innerHTML = "Top 25 Most Populated Countries in the World (2020 Data)"
         document.getElementById("explanation").innerHTML = "In the previous slide, you saw how the world's population is spread across different regions. But how is the world's population spread across the different countries of the world?"
         document.getElementById("dropdown").style.visibility = "hidden";
         document.getElementById("yearDropdown").style.visibility = "hidden";
+        document.getElementById("slide1button").style.backgroundColor = "white";
+        document.getElementById("slide3button").style.backgroundColor = "white";
+        document.getElementById("title2").innerHTML = "";
         d3.selectAll("svg > *").remove();
         createSecondScene()
     }
     function goToSlide3(){
+        document.getElementById("slide3button").style.backgroundColor = "rebeccapurple";
         d3.selectAll("svg > *").remove();
+        document.getElementById("slide2button").style.backgroundColor = "white";
+        document.getElementById("slide1button").style.backgroundColor = "white";
         document.getElementById("dropdown").style.visibility = "visible";
         document.getElementById("yearDropdown").style.visibility = "visible";
         loadPopulationData() // creates chart as well
