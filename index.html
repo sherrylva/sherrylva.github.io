@@ -73,8 +73,8 @@
     loadCountriesData(); //basically loads first scene
 
     function yearDropdownChange(year, country){
-        console.log(year)
-        console.log(country)
+        // console.log(year)
+        // console.log(country)
         const currPop = popMap.get(country);
         const change = yearlyChangeMap.get(country);
         var currYear = 2020;
@@ -91,8 +91,8 @@
             predictedYears.push(currYear)
             currYear += 1
         }
-        console.log(predictedPopulations)
-        console.log(predictedYears)
+        // console.log(predictedPopulations)
+        // console.log(predictedYears)
         document.getElementById("explanation").innerHTML = "So you have seen how the world's population is spread across regions and countries. Now let us take a look at how population is spread within a particular country. Use the dropdown below to choose a country. The first bar chart shows how the total population compares to the urban population of the country. The urban population refers to the population located within urban areas/cities. Then choose a year from the year dropdown to see how the population is expected to change within the selected country."
         document.getElementById("chart-title").innerHTML = country + " : Total Population vs. Urban Population"
        
@@ -113,7 +113,7 @@
         d3.select("#svg2").append("g").attr("transform", "translate(100, 450)").call(d3.axisBottom(x)).selectAll("text")  
         .style("text-anchor", "end")
         .attr("transform", "rotate(-55)");
-        console.log("end")
+
 
     }
     function dropdownChange(country){
@@ -121,10 +121,10 @@
         yearDropdownChange(2030, country)
         document.getElementById("chart-title").innerHTML = country + " : Total Population vs. Urban Population (2020 Data)"
         d3.select('#svg').selectAll("*").remove();
-        console.log(popMap)
+        // console.log(popMap)
         countryPopulation = popMap.get(country);
         urbanPopulation = urbanMap.get(country);
-        console.log(countryPopulation)
+        // console.log(countryPopulation)
     
         population = [countryPopulation, urbanPopulation]
         domains = ["Total Population", "Urban Population"]
@@ -216,8 +216,8 @@
             }
         }
         const sortedMap = new Map([...mapPop.entries()].sort((a, b) => b[1] - a[1]));
-        console.log(sortedMap);
-        console.log(mapNumCountries);
+        // console.log(sortedMap);
+        // console.log(mapNumCountries);
         regions = []
         population = []
         for (let key of sortedMap.keys()) {
@@ -309,8 +309,8 @@
 
         }
 
-        console.log(countries_second_scene);
-        console.log(populations_second_scene);
+        // console.log(countries_second_scene);
+        // console.log(populations_second_scene);
         max = Math.max(...populations_second_scene)
         var x = d3.scaleBand().domain(countries_second_scene).range([0, 700]);
         var y = d3.scaleLinear().domain([0, max]).range([350, 0]);
